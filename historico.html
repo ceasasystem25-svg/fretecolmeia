@@ -34,26 +34,38 @@
     .btn-excluir { background-color: #dc3545; }
     .btn-fechar { background-color: #6c757d; }
 
-    #loading-msg { text-align: center; color: #e0961a; font-weight: bold; font-size: 16px; margin: 20px 0; }
+    #loading-msg { text-align: center; color: #e0961a; font-weight: bold; font-size: 16px; margin: 20px 0; display: none; }
     
     /* Ocultar áreas de impressão na tela */
     #cupom-impressao, #a4-impressao { display: none; }
 
     /* ==================================================
-       ESTILOS DE IMPRESSÃO (TÉRMICA E A4)
+       ESTILOS DE IMPRESSÃO (TÉRMICA E A4) - CORRIGIDO
        ================================================== */
     @media print {
-      body * { visibility: hidden; }
+      /* Remove cabeçalhos e rodapés do navegador (URL, data) */
+      @page { margin: 0; }
+      
       body { background-color: white; margin: 0; padding: 0; }
 
+      /* Esconde completamente a interface do sistema para não gerar papel em branco */
+      .container, #modal-detalhes { display: none !important; }
+
       /* IMPRESSÃO TÉRMICA (80mm) */
-      body.print-termica #cupom-impressao, body.print-termica #cupom-impressao * { visibility: visible; }
       body.print-termica #cupom-impressao {
-        display: block; position: absolute; left: 0; top: 0; width: 80mm;
-        font-family: 'Courier New', Courier, monospace; font-size: 14px; padding: 5px;
-        color: #000000 !important; font-weight: 900 !important;
-        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        display: block; 
+        width: 80mm;
+        margin: 0; 
+        padding: 5px;
+        font-family: 'Courier New', Courier, monospace; 
+        font-size: 14px; 
+        color: #000000 !important; 
+        font-weight: 900 !important;
+        -webkit-print-color-adjust: exact; 
+        print-color-adjust: exact;
       }
+      body.print-termica #a4-impressao { display: none !important; }
+
       .cupom-header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
       .cupom-header img { max-width: 80px; margin-bottom: 5px; filter: grayscale(100%) contrast(200%); }
       .cupom-info { margin-bottom: 10px; }
@@ -63,13 +75,18 @@
       .cupom-total { border-top: 2px dashed #000; margin-top: 10px; padding-top: 10px; font-size: 16px; text-align: right; font-weight: bold; }
 
       /* IMPRESSÃO A4 (Normal) */
-      body.print-a4 #a4-impressao, body.print-a4 #a4-impressao * { visibility: visible; }
       body.print-a4 #a4-impressao {
-        display: block; position: absolute; left: 0; top: 0; width: 100%;
-        font-family: Arial, sans-serif; font-size: 14px; padding: 20px;
+        display: block; 
+        width: 100%;
+        font-family: Arial, sans-serif; 
+        font-size: 14px; 
+        padding: 20px;
         color: #000000 !important;
-        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        -webkit-print-color-adjust: exact; 
+        print-color-adjust: exact;
       }
+      body.print-a4 #cupom-impressao { display: none !important; }
+
       .a4-header-container { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
       .a4-header-container img { max-width: 150px; }
       .a4-titulo { text-align: right; }
@@ -175,9 +192,13 @@
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQDc-ilfch6OiY7egL9T8OSTdsWQmpJaWqYt2Kv_IOYIRYRl6wo8wZXEkkYJAFoqBG/exec'; 
 
     let fretesAgrupados = {};
-    let freteAberto = null; // Guarda o frete que está sendo visualizado no modal
+    let freteAberto = null;
 
     window.onload = async function() {
+      if (APPS_SCRIPT_URL === 'COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT' || APPS_SCRIPT_URL === 'COLE_AQUI_A_NOVA_URL') {
+        alert("Atenção: Cole a URL do Apps Script no código fonte do Histórico!");
+        return;
+      }
       carregarHistorico();
     };
 
@@ -208,7 +229,6 @@
     }
 
     function agruparFretes(registros) {
-      // O Google Sheets manda linha por linha. Precisamos juntar quem tem a mesma Data e Cliente num "pacote" só.
       registros.forEach(r => {
         const chave = r.data + "|" + r.cliente;
         
@@ -218,7 +238,7 @@
             data: r.data,
             cliente: r.cliente,
             itens: [],
-            linhasNaPlanilha: [], // Guarda as linhas para poder excluir depois
+            linhasNaPlanilha: [], 
             valorTotalGeral: 0
           };
         }
@@ -231,7 +251,6 @@
 
     function renderizarTabela() {
       const tbody = document.getElementById('lista-historico');
-      // Transforma o objeto em um array e inverte para mostrar os mais novos primeiro
       const lista = Object.values(fretesAgrupados).reverse();
 
       if (lista.length === 0) {
@@ -296,7 +315,7 @@
 
         if (resultado.status === "Sucesso") {
           fecharModal();
-          carregarHistorico(); // Recarrega a tabela após excluir
+          carregarHistorico(); 
         } else {
           alert("Erro ao excluir: " + resultado.mensagem);
         }
