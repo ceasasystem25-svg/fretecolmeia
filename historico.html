@@ -5,67 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Histórico de Fretes - Colmeia</title>
   <style>
-    /* Estilos Gerais */
     body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; color: #333; margin: 0; }
     .container { max-width: 800px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: auto; }
     h2 { text-align: center; color: #333; margin-top: 5px; }
     .logo-img { max-width: 120px; display: block; margin: 0 auto 15px auto; }
-    
     button { background-color: #f5a623; color: #fff; border: none; font-weight: bold; cursor: pointer; transition: background 0.3s; padding: 10px 15px; border-radius: 6px; }
     button:hover { background-color: #e0961a; }
-    
-    /* Tabela de Histórico */
     .tabela-container { margin-top: 20px; overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 15px; }
     th, td { border-bottom: 1px solid #ddd; padding: 12px; text-align: left; }
     th { background-color: #f8f9fa; }
     tr:hover { background-color: #f1f1f1; }
-    
     .btn-acao { background-color: #007bff; font-size: 12px; padding: 6px 10px; }
     .btn-acao:hover { background-color: #0056b3; }
-    
     .btn-voltar { background-color: #6c757d; display: inline-block; text-decoration: none; color: white; padding: 10px 15px; border-radius: 6px; font-weight: bold; margin-bottom: 20px;}
-
-    /* Modal de Detalhes */
+    
     #modal-detalhes { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
     .modal-content { background: white; width: 90%; max-width: 500px; padding: 20px; border-radius: 8px; max-height: 90vh; overflow-y: auto; }
     .resumo-linha { margin-bottom: 8px; font-size: 15px; }
     .botoes-modal { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
     .btn-excluir { background-color: #dc3545; }
     .btn-fechar { background-color: #6c757d; }
-
-    #loading-msg { text-align: center; color: #e0961a; font-weight: bold; font-size: 16px; margin: 20px 0; display: none; }
     
-    /* Ocultar áreas de impressão na tela */
+    #loading-msg { text-align: center; color: #e0961a; font-weight: bold; font-size: 16px; margin: 20px 0; display: none; }
     #cupom-impressao, #a4-impressao { display: none; }
 
-    /* ==================================================
-       ESTILOS DE IMPRESSÃO (TÉRMICA E A4) - CORRIGIDO
-       ================================================== */
     @media print {
-      /* Remove cabeçalhos e rodapés do navegador (URL, data) */
       @page { margin: 0; }
-      
       body { background-color: white; margin: 0; padding: 0; }
-
-      /* Esconde completamente a interface do sistema para não gerar papel em branco */
       .container, #modal-detalhes { display: none !important; }
 
-      /* IMPRESSÃO TÉRMICA (80mm) */
+      /* TÉRMICA */
       body.print-termica #cupom-impressao {
-        display: block; 
-        width: 80mm;
-        margin: 0; 
-        padding: 5px;
-        font-family: 'Courier New', Courier, monospace; 
-        font-size: 14px; 
-        color: #000000 !important; 
-        font-weight: 900 !important;
-        -webkit-print-color-adjust: exact; 
-        print-color-adjust: exact;
+        display: block; width: 80mm; margin: 0; padding: 5px;
+        font-family: 'Courier New', Courier, monospace; font-size: 14px; 
+        color: #000000 !important; font-weight: 900 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact;
       }
       body.print-termica #a4-impressao { display: none !important; }
-
       .cupom-header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
       .cupom-header img { max-width: 80px; margin-bottom: 5px; filter: grayscale(100%) contrast(200%); }
       .cupom-info { margin-bottom: 10px; }
@@ -74,19 +50,12 @@
       .cupom-item-valores { display: flex; justify-content: space-between; font-size: 13px; }
       .cupom-total { border-top: 2px dashed #000; margin-top: 10px; padding-top: 10px; font-size: 16px; text-align: right; font-weight: bold; }
 
-      /* IMPRESSÃO A4 (Normal) */
+      /* A4 */
       body.print-a4 #a4-impressao {
-        display: block; 
-        width: 100%;
-        font-family: Arial, sans-serif; 
-        font-size: 14px; 
-        padding: 20px;
-        color: #000000 !important;
-        -webkit-print-color-adjust: exact; 
-        print-color-adjust: exact;
+        display: block; width: 100%; font-family: Arial, sans-serif; font-size: 14px; padding: 20px;
+        color: #000000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact;
       }
       body.print-a4 #cupom-impressao { display: none !important; }
-
       .a4-header-container { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
       .a4-header-container img { max-width: 150px; }
       .a4-titulo { text-align: right; }
@@ -105,24 +74,14 @@
 
   <div class="container">
     <a href="index.html" class="btn-voltar">← Voltar para Lançamentos</a>
-    <img src="https://i.postimg.cc/5t29QDKd/logo.png" alt="Logo Frete Colmeia" class="logo-img">
+    <img src="https://cdn-icons-png.flaticon.com/512/2766/2766184.png" alt="Logo Frete Colmeia" class="logo-img">
     <h2>Histórico de Fretes Lançados</h2>
-    
     <p id="loading-msg">Carregando banco de dados...</p>
     
     <div class="tabela-container">
       <table>
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Cliente</th>
-            <th>Total Itens</th>
-            <th>Valor Total</th>
-            <th>Ação</th>
-          </tr>
-        </thead>
-        <tbody id="lista-historico">
-          </tbody>
+        <thead><tr><th>Data</th><th>Cliente</th><th>Vendedor</th><th>Valor Total</th><th>Ação</th></tr></thead>
+        <tbody id="lista-historico"></tbody>
       </table>
     </div>
   </div>
@@ -132,13 +91,22 @@
       <h3 style="border-bottom: 2px solid #f5a623; padding-bottom: 10px;">Detalhes do Frete</h3>
       <div class="resumo-linha"><strong>Data:</strong> <span id="det-data"></span></div>
       <div class="resumo-linha"><strong>Cliente:</strong> <span id="det-cliente"></span></div>
-      
+      <div class="resumo-linha"><strong>Vendedor:</strong> <span id="det-vendedor"></span></div>
       <h4 style="margin: 15px 0 5px 0;">Produtos Lançados:</h4>
-      <ul id="det-lista" style="margin: 0; padding-left: 20px; font-size: 14px; margin-bottom: 15px;"></ul>
       
-      <div style="font-size: 18px; font-weight: bold; text-align: right; color: #d32f2f;">
-        Total Pago: R$ <span id="det-total"></span>
-      </div>
+      <table style="width:100%; border-collapse: collapse; font-size:14px; margin-bottom:15px; border:1px solid #ddd;">
+        <thead style="background:#f8f9fa;">
+          <tr>
+            <th style="padding:5px; border:1px solid #ddd;">Qtd</th>
+            <th style="padding:5px; border:1px solid #ddd;">Item</th>
+            <th style="padding:5px; border:1px solid #ddd;">V.Unit</th>
+            <th style="padding:5px; border:1px solid #ddd;">Total</th>
+          </tr>
+        </thead>
+        <tbody id="det-lista-tbody"></tbody>
+      </table>
+
+      <div style="font-size: 18px; font-weight: bold; text-align: right; color: #d32f2f;">Total Pago: R$ <span id="det-total"></span></div>
 
       <div class="botoes-modal">
         <button type="button" onclick="imprimir('termica')" style="background-color: #343a40;">🖨️ Reimprimir (Térmica)</button>
@@ -150,14 +118,11 @@
   </div>
 
   <div id="cupom-impressao">
-    <div class="cupom-header">
-      <img src="https://cdn-icons-png.flaticon.com/512/2766/2766184.png" alt="Logo"><br>
-      <strong>CONTROLE DE FRETE COLMEIA</strong><br>
-      <small>(2ª VIA)</small>
-    </div>
+    <div class="cupom-header"><img src="https://cdn-icons-png.flaticon.com/512/2766/2766184.png" alt="Logo"><br><strong>CONTROLE DE FRETE COLMEIA</strong><br><small>(2ª VIA)</small></div>
     <div class="cupom-info">
       <div><strong>Data:</strong> <span id="print-t-data"></span></div>
       <div><strong>Cliente:</strong> <span id="print-t-cliente"></span></div>
+      <div><strong>Vend:</strong> <span id="print-t-vendedor"></span></div>
     </div>
     <div style="border-top: 2px dashed #000; padding-top: 10px; margin-bottom: 10px;"><strong>ITENS DO FRETE:</strong></div>
     <div id="print-t-itens-container"></div>
@@ -168,14 +133,12 @@
   <div id="a4-impressao">
     <div class="a4-header-container">
       <div><img src="https://cdn-icons-png.flaticon.com/512/2766/2766184.png" alt="Logo"></div>
-      <div class="a4-titulo">
-        <h1>Controle de Frete Colmeia</h1>
-        <p>Recibo de Lançamento - 2ª VIA</p>
-      </div>
+      <div class="a4-titulo"><h1>Controle de Frete Colmeia</h1><p>Recibo de Lançamento - 2ª VIA</p></div>
     </div>
     <div class="a4-dados-cliente">
       <strong>Data do Lançamento:</strong> <span id="print-a-data"></span><br><br>
-      <strong>Nome do Cliente:</strong> <span id="print-a-cliente"></span>
+      <strong>Nome do Cliente:</strong> <span id="print-a-cliente"></span><br><br>
+      <strong>Vendedor Responsável:</strong> <span id="print-a-vendedor"></span>
     </div>
     <table class="a4-table">
       <thead><tr><th>Código</th><th>Descrição da Mercadoria</th><th>Volume (Qtd)</th><th>Valor Unitário</th><th>Subtotal</th></tr></thead>
@@ -218,33 +181,23 @@
         if (resultado.status === "Sucesso") {
           agruparFretes(resultado.registros);
           renderizarTabela();
-        } else {
-          alert("Erro: " + resultado.mensagem);
-        }
-      } catch (error) {
-        alert("Erro ao conectar com a planilha.");
-      } finally {
-        document.getElementById('loading-msg').style.display = 'none';
-      }
+        } else { alert("Erro: " + resultado.mensagem); }
+      } catch (error) { alert("Erro ao conectar com a planilha.");
+      } finally { document.getElementById('loading-msg').style.display = 'none'; }
     }
 
     function agruparFretes(registros) {
       registros.forEach(r => {
-        // Corta a data no "T" para limpar qualquer lixo de fuso horário
         const dataLimpa = r.data.split('T')[0];
         const chave = dataLimpa + "|" + r.cliente;
         
         if (!fretesAgrupados[chave]) {
           fretesAgrupados[chave] = {
-            chave: chave,
-            data: dataLimpa, // Guarda a data limpa
-            cliente: r.cliente,
-            itens: [],
-            linhasNaPlanilha: [], 
-            valorTotalGeral: 0
+            chave: chave, data: dataLimpa, cliente: r.cliente,
+            vendedor: r.vendedor, 
+            itens: [], linhasNaPlanilha: [], valorTotalGeral: 0
           };
         }
-        
         fretesAgrupados[chave].itens.push(r);
         fretesAgrupados[chave].linhasNaPlanilha.push(r.linha);
         fretesAgrupados[chave].valorTotalGeral += parseFloat(r.subtotal);
@@ -255,23 +208,11 @@
       const tbody = document.getElementById('lista-historico');
       const lista = Object.values(fretesAgrupados).reverse();
 
-      if (lista.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhum frete encontrado.</td></tr>';
-        return;
-      }
+      if (lista.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhum frete encontrado.</td></tr>'; return; }
 
       lista.forEach(frete => {
-        // Agora a dataLimpa é formatada corretamente para DD/MM/AAAA
         const dataBr = frete.data.split('-').reverse().join('/');
-        tbody.innerHTML += `
-          <tr>
-            <td>${dataBr}</td>
-            <td>${frete.cliente}</td>
-            <td>${frete.itens.length}</td>
-            <td>R$ ${frete.valorTotalGeral.toFixed(2)}</td>
-            <td><button class="btn-acao" onclick="abrirModal('${frete.chave}')">Abrir</button></td>
-          </tr>
-        `;
+        tbody.innerHTML += `<tr><td>${dataBr}</td><td>${frete.cliente}</td><td>${frete.vendedor}</td><td>R$ ${frete.valorTotalGeral.toFixed(2)}</td><td><button class="btn-acao" onclick="abrirModal('${frete.chave}')">Abrir</button></td></tr>`;
       });
     }
 
@@ -281,97 +222,64 @@
       
       document.getElementById('det-data').innerText = dataBr;
       document.getElementById('det-cliente').innerText = freteAberto.cliente;
+      document.getElementById('det-vendedor').innerText = freteAberto.vendedor;
       document.getElementById('det-total').innerText = freteAberto.valorTotalGeral.toFixed(2);
       
-      const ul = document.getElementById('det-lista');
-      ul.innerHTML = "";
-      freteAberto.itens.forEach(item => {
-        ul.innerHTML += `<li>${item.quantidade}x ${item.mercadoria} (R$ ${item.valorUnitario.toFixed(2)}/un) = <strong>R$ ${item.subtotal.toFixed(2)}</strong></li>`;
+      const tbodyModal = document.getElementById('det-lista-tbody');
+      tbodyModal.innerHTML = "";
+      freteAberto.itens.forEach(item => { 
+        tbodyModal.innerHTML += `<tr>
+          <td style="padding:5px; border:1px solid #ddd; text-align:center;">${item.quantidade}x</td>
+          <td style="padding:5px; border:1px solid #ddd;">${item.mercadoria}</td>
+          <td style="padding:5px; border:1px solid #ddd;">R$ ${item.valorUnitario.toFixed(2)}</td>
+          <td style="padding:5px; border:1px solid #ddd;"><strong>R$ ${item.subtotal.toFixed(2)}</strong></td>
+        </tr>`; 
       });
-
       document.getElementById('modal-detalhes').style.display = 'flex';
     }
 
-    function fecharModal() {
-      document.getElementById('modal-detalhes').style.display = 'none';
-      freteAberto = null;
-    }
+    function fecharModal() { document.getElementById('modal-detalhes').style.display = 'none'; freteAberto = null; }
 
     async function excluirFrete() {
-      const confirmacao = confirm("CUIDADO: Tem certeza que deseja excluir permanentemente este frete da planilha?");
-      if (!confirmacao) return;
-
+      if (!confirm("CUIDADO: Tem certeza que deseja excluir este frete?")) return;
       const btn = document.querySelector('.btn-excluir');
-      btn.innerText = "Excluindo...";
-      btn.disabled = true;
-
+      btn.innerText = "Excluindo..."; btn.disabled = true;
       try {
         const response = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ 
-            acao: 'excluir', 
-            linhas: freteAberto.linhasNaPlanilha 
-          })
+          method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ acao: 'excluir', linhas: freteAberto.linhasNaPlanilha })
         });
         const resultado = await response.json();
-
-        if (resultado.status === "Sucesso") {
-          fecharModal();
-          carregarHistorico(); 
-        } else {
-          alert("Erro ao excluir: " + resultado.mensagem);
-        }
-      } catch (error) {
-        alert("Erro de rede ao excluir.");
-      } finally {
-        btn.innerText = "🗑️ Excluir Lançamento do Sistema";
-        btn.disabled = false;
-      }
+        if (resultado.status === "Sucesso") { fecharModal(); carregarHistorico(); } 
+        else { alert("Erro ao excluir: " + resultado.mensagem); }
+      } catch (error) { alert("Erro de rede ao excluir."); } 
+      finally { btn.innerText = "🗑️ Excluir Lançamento do Sistema"; btn.disabled = false; }
     }
 
     function imprimir(tipo) {
       const dataBr = freteAberto.data.split('-').reverse().join('/');
-      
       document.body.classList.remove('print-termica', 'print-a4');
       document.body.classList.add('print-' + tipo);
 
       if (tipo === 'termica') {
         document.getElementById('print-t-data').innerText = dataBr;
         document.getElementById('print-t-cliente').innerText = freteAberto.cliente;
+        document.getElementById('print-t-vendedor').innerText = freteAberto.vendedor;
         document.getElementById('print-t-total').innerText = freteAberto.valorTotalGeral.toFixed(2);
         
         const cItens = document.getElementById('print-t-itens-container');
         cItens.innerHTML = "";
-        freteAberto.itens.forEach(item => {
-          cItens.innerHTML += `
-            <div class="cupom-item">
-              <div class="cupom-item-title">${item.codigo} - ${item.mercadoria}</div>
-              <div class="cupom-item-valores">
-                <span>${item.quantidade} x R$ ${item.valorUnitario.toFixed(2)}</span>
-                <strong>R$ ${item.subtotal.toFixed(2)}</strong>
-              </div>
-            </div>`;
-        });
+        freteAberto.itens.forEach(item => { cItens.innerHTML += `<div class="cupom-item"><div class="cupom-item-title">${item.codigo} - ${item.mercadoria}</div><div class="cupom-item-valores"><span>${item.quantidade} x R$ ${item.valorUnitario.toFixed(2)}</span><strong>R$ ${item.subtotal.toFixed(2)}</strong></div></div>`; });
       } else {
         document.getElementById('print-a-data').innerText = dataBr;
         document.getElementById('print-a-cliente').innerText = freteAberto.cliente;
+        document.getElementById('print-a-vendedor').innerText = freteAberto.vendedor;
         document.getElementById('print-a-total').innerText = freteAberto.valorTotalGeral.toFixed(2);
         
         const cItensA4 = document.getElementById('print-a-itens-container');
         cItensA4.innerHTML = "";
-        freteAberto.itens.forEach(item => {
-          cItensA4.innerHTML += `
-            <tr>
-              <td>${item.codigo}</td>
-              <td>${item.mercadoria}</td>
-              <td>${item.quantidade}</td>
-              <td>R$ ${item.valorUnitario.toFixed(2)}</td>
-              <td><strong>R$ ${item.subtotal.toFixed(2)}</strong></td>
-            </tr>`;
-        });
+        freteAberto.itens.forEach(item => { cItensA4.innerHTML += `<tr><td>${item.codigo}</td><td>${item.mercadoria}</td><td>${item.quantidade}</td><td>R$ ${item.valorUnitario.toFixed(2)}</td><td><strong>R$ ${item.subtotal.toFixed(2)}</strong></td></tr>`; });
       }
-      
       window.print();
     }
   </script>
