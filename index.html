@@ -5,15 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lançamento de Frete - Colmeia</title>
   <style>
-    /* Estilos Gerais */
-    body { 
-      font-family: Arial, sans-serif; 
-      background-color: #f4f4f9; 
-      padding: 20px; 
-      color: #333; 
-      margin: 0; 
-      padding-bottom: 100px; 
-    }
+    body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; color: #333; margin: 0; padding-bottom: 100px; }
     .container { max-width: 600px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: auto; }
     h2, h3 { text-align: center; color: #333; margin-top: 5px; margin-bottom: 5px; }
     .logo-img { max-width: 120px; display: block; margin: 0 auto 15px auto; }
@@ -56,34 +48,19 @@
     .botoes-impressao button { margin: 0; }
 
     #loading-msg { text-align: center; color: #e0961a; font-weight: bold; font-size: 14px; display: none; }
-    
-    /* Esconde as áreas de impressão na tela normal */
     #cupom-impressao, #a4-impressao { display: none; }
 
-    /* ==================================================
-       ESTILOS DE IMPRESSÃO (TÉRMICA E A4) - CORRIGIDO
-       ================================================== */
     @media print {
-      /* Remove cabeçalhos e rodapés do navegador (URL, data) */
       @page { margin: 0; }
-      
       body { background-color: white; margin: 0; padding: 0; }
-
-      /* Esconde completamente a interface do sistema para não gerar papel em branco */
       .container, .barra-fixa-rodape, #modal-revisao { display: none !important; }
 
-      /* IMPRESSÃO TÉRMICA (80mm) */
+      /* IMPRESSÃO TÉRMICA */
       body.print-termica #cupom-impressao {
-        display: block; 
-        width: 80mm;
-        margin: 0; 
-        padding: 5px;
-        font-family: 'Courier New', Courier, monospace; 
-        font-size: 14px; 
-        color: #000000 !important; 
-        font-weight: 900 !important;
-        -webkit-print-color-adjust: exact; 
-        print-color-adjust: exact;
+        display: block; width: 80mm; margin: 0; padding: 5px;
+        font-family: 'Courier New', Courier, monospace; font-size: 14px; 
+        color: #000000 !important; font-weight: 900 !important;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
       }
       body.print-termica #a4-impressao { display: none !important; }
 
@@ -95,16 +72,10 @@
       .cupom-item-valores { display: flex; justify-content: space-between; font-size: 13px; }
       .cupom-total { border-top: 2px dashed #000; margin-top: 10px; padding-top: 10px; font-size: 16px; text-align: right; font-weight: bold; }
 
-      /* IMPRESSÃO A4 (Normal) */
+      /* IMPRESSÃO A4 */
       body.print-a4 #a4-impressao {
-        display: block; 
-        width: 100%;
-        font-family: Arial, sans-serif; 
-        font-size: 14px; 
-        padding: 20px;
-        color: #000000 !important;
-        -webkit-print-color-adjust: exact; 
-        print-color-adjust: exact;
+        display: block; width: 100%; font-family: Arial, sans-serif; font-size: 14px; padding: 20px;
+        color: #000000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact;
       }
       body.print-a4 #cupom-impressao { display: none !important; }
 
@@ -125,46 +96,35 @@
 <body>
 
   <div class="container" id="form-container">
-    <img src="https://i.postimg.cc/5t29QDKd/logo.png" alt="Logo Frete Colmeia" class="logo-img">
+    <img src="https://cdn-icons-png.flaticon.com/512/2766/2766184.png" alt="Logo Frete Colmeia" class="logo-img">
     <h2>Controle de Frete</h2>
-    
     <a href="historico.html" style="display:block; text-align:center; color:#007bff; font-weight:bold; margin-bottom:15px; text-decoration:none;">Ver Histórico de Fretes ➔</a>
-    
     <p id="loading-msg">Conectando ao banco de dados...</p>
     
     <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #e9ecef;">
       <div class="linha-dupla">
-        <div>
-          <label style="margin-top:0;">Data:</label>
-          <input type="date" id="data" class="nav-enter" required>
-        </div>
+        <div><label style="margin-top:0;">Data:</label><input type="date" id="data" class="nav-enter" required></div>
         <div>
           <label style="margin-top:0;">Cliente:</label>
-          <select id="cliente" class="nav-enter" required disabled>
-            <option value="">Aguarde...</option>
-          </select>
+          <select id="cliente" class="nav-enter" required disabled><option value="">Aguarde...</option></select>
         </div>
       </div>
+      <label>Vendedor:</label>
+      <select id="vendedor" class="nav-enter" required disabled>
+        <option value="">Aguarde...</option>
+      </select>
     </div>
 
     <div style="border-left: 4px solid #f5a623; padding-left: 15px;">
       <label style="margin-top:0;">Mercadoria:</label>
-      <select id="mercadoria" class="nav-enter" onchange="atualizarCodigo()" disabled>
-        <option value="">Aguarde...</option>
-      </select>
+      <select id="mercadoria" class="nav-enter" onchange="atualizarCodigo()" disabled><option value="">Aguarde...</option></select>
       
       <label>Código da Mercadoria:</label>
       <input type="text" id="codigo" readonly placeholder="Automático">
       
       <div class="linha-dupla">
-        <div>
-          <label>Volume (Qtd):</label>
-          <input type="number" id="quantidade" class="nav-enter" min="1" value="1" oninput="calcularSubtotal()">
-        </div>
-        <div>
-          <label>V. Unitário (R$):</label>
-          <input type="number" id="valorUnitario" class="nav-enter" step="0.01" placeholder="0.00" oninput="calcularSubtotal()">
-        </div>
+        <div><label>Volume (Qtd):</label><input type="number" id="quantidade" class="nav-enter" min="1" value="1" oninput="calcularSubtotal()"></div>
+        <div><label>V. Unitário (R$):</label><input type="number" id="valorUnitario" class="nav-enter" step="0.01" placeholder="0.00" oninput="calcularSubtotal()"></div>
       </div>
       
       <label>Subtotal (R$):</label>
@@ -175,17 +135,8 @@
 
     <div class="tabela-container">
       <table>
-        <thead>
-          <tr>
-            <th>Qtd</th>
-            <th>Mercadoria</th>
-            <th>Total</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="lista-itens">
-          <tr><td colspan="4" style="text-align:center; color:#777;">Nenhum produto adicionado</td></tr>
-        </tbody>
+        <thead><tr><th>Qtd</th><th>Mercadoria</th><th>Total</th><th></th></tr></thead>
+        <tbody id="lista-itens"><tr><td colspan="4" style="text-align:center; color:#777;">Nenhum produto adicionado</td></tr></tbody>
       </table>
       <div class="total-geral-box">Total Geral: R$ <span id="totalGeralVisor">0.00</span></div>
     </div>
@@ -200,13 +151,12 @@
       <h3 style="border-bottom: 2px solid #f5a623; padding-bottom: 10px;">Revisão do Lançamento</h3>
       <div class="resumo-linha"><strong>Data:</strong> <span id="rev-data"></span></div>
       <div class="resumo-linha"><strong>Cliente:</strong> <span id="rev-cliente"></span></div>
+      <div class="resumo-linha"><strong>Vendedor:</strong> <span id="rev-vendedor"></span></div>
       
       <h4 style="margin: 15px 0 5px 0;">Produtos:</h4>
       <ul id="rev-lista" style="margin: 0; padding-left: 20px; font-size: 14px; margin-bottom: 15px;"></ul>
       
-      <div style="font-size: 18px; font-weight: bold; text-align: right; color: #d32f2f;">
-        Total a Pagar: R$ <span id="rev-total"></span>
-      </div>
+      <div style="font-size: 18px; font-weight: bold; text-align: right; color: #d32f2f;">Total a Pagar: R$ <span id="rev-total"></span></div>
 
       <div class="botoes-impressao">
         <button type="button" id="btnSalvarTermica" onclick="processarEnvio('termica')" style="background-color: #343a40;">🖨️ Salvar e Imprimir (Térmica)</button>
@@ -217,98 +167,65 @@
   </div>
 
   <div id="cupom-impressao">
-    <div class="cupom-header">
-      <img src="https://cdn-icons-png.flaticon.com/512/2766/2766184.png" alt="Logo"><br>
-      <strong>CONTROLE DE FRETE COLMEIA</strong>
-    </div>
+    <div class="cupom-header"><img src="https://cdn-icons-png.flaticon.com/512/2766/2766184.png" alt="Logo"><br><strong>CONTROLE DE FRETE COLMEIA</strong></div>
     <div class="cupom-info">
       <div><strong>Data:</strong> <span id="print-t-data"></span></div>
       <div><strong>Cliente:</strong> <span id="print-t-cliente"></span></div>
+      <div><strong>Vend:</strong> <span id="print-t-vendedor"></span></div>
     </div>
-    <div style="border-top: 2px dashed #000; padding-top: 10px; margin-bottom: 10px;">
-      <strong>ITENS DO FRETE:</strong>
-    </div>
+    <div style="border-top: 2px dashed #000; padding-top: 10px; margin-bottom: 10px;"><strong>ITENS DO FRETE:</strong></div>
     <div id="print-t-itens-container"></div>
-    <div class="cupom-total">
-      TOTAL GERAL: R$ <span id="print-t-total"></span>
-    </div>
-    <div style="text-align: center; margin-top: 35px; font-size: 12px;">
-      Assinatura do Responsável<br><br>_________________________
-    </div>
+    <div class="cupom-total">TOTAL GERAL: R$ <span id="print-t-total"></span></div>
+    <div style="text-align: center; margin-top: 35px; font-size: 12px;">Assinatura do Responsável<br><br>_________________________</div>
   </div>
 
   <div id="a4-impressao">
     <div class="a4-header-container">
       <div><img src="https://cdn-icons-png.flaticon.com/512/2766/2766184.png" alt="Logo"></div>
-      <div class="a4-titulo">
-        <h1>Controle de Frete Colmeia</h1>
-        <p>Recibo de Lançamento e Transporte</p>
-      </div>
+      <div class="a4-titulo"><h1>Controle de Frete Colmeia</h1><p>Recibo de Lançamento e Transporte</p></div>
     </div>
     <div class="a4-dados-cliente">
       <strong>Data do Lançamento:</strong> <span id="print-a-data"></span><br><br>
-      <strong>Nome do Cliente:</strong> <span id="print-a-cliente"></span>
+      <strong>Nome do Cliente:</strong> <span id="print-a-cliente"></span><br><br>
+      <strong>Vendedor Responsável:</strong> <span id="print-a-vendedor"></span>
     </div>
     <table class="a4-table">
-      <thead>
-        <tr>
-          <th>Código</th>
-          <th>Descrição da Mercadoria</th>
-          <th>Volume (Qtd)</th>
-          <th>Valor Unitário</th>
-          <th>Subtotal</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Código</th><th>Descrição da Mercadoria</th><th>Volume (Qtd)</th><th>Valor Unitário</th><th>Subtotal</th></tr></thead>
       <tbody id="print-a-itens-container"></tbody>
     </table>
-    <div class="a4-total">
-      TOTAL A PAGAR: R$ <span id="print-a-total"></span>
-    </div>
-    <div class="a4-assinatura">
-      <div>Assinatura do Responsável</div>
-    </div>
+    <div class="a4-total">TOTAL A PAGAR: R$ <span id="print-a-total"></span></div>
+    <div class="a4-assinatura"><div>Assinatura do Responsável</div></div>
   </div>
 
   <script>
     // ==========================================
     // COLE A SUA NOVA URL DO APPS SCRIPT ABAIXO
     // ==========================================
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQDc-ilfch6OiY7egL9T8OSTdsWQmpJaWqYt2Kv_IOYIRYRl6wo8wZXEkkYJAFoqBG/exec'; 
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx8Dnfewt5MZ12vMyTDxHhCnCbydq9m0W_lSqMLK4-PFxUvThDayq0Rm4wRcD5ZUVfY/exec'; 
 
     let itensFrete = []; 
     let totalGeral = 0;
 
     document.getElementById('data').valueAsDate = new Date();
 
-    // Lógica para o ENTER pular de campo
     document.addEventListener('keydown', function(event) {
       if (event.key === 'Enter') {
         const elementosNav = Array.from(document.querySelectorAll('.nav-enter:not([disabled])'));
         const indexAtivo = elementosNav.indexOf(document.activeElement);
-        
         if (indexAtivo > -1) {
-          event.preventDefault(); // Impede o envio acidental de formulário
-          if (document.activeElement.id === 'btnAdicionar') {
-            adicionarItem(); // Se o enter for no botão adicionar, ele adiciona direto
-          } else if (indexAtivo < elementosNav.length - 1) {
-            elementosNav[indexAtivo + 1].focus(); // Pula pro próximo campo
-          }
+          event.preventDefault(); 
+          if (document.activeElement.id === 'btnAdicionar') { adicionarItem(); } 
+          else if (indexAtivo < elementosNav.length - 1) { elementosNav[indexAtivo + 1].focus(); }
         }
       }
     });
 
     window.onload = async function() {
-      if (APPS_SCRIPT_URL === 'COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT' || APPS_SCRIPT_URL === 'COLE_AQUI_A_NOVA_URL') {
-        alert("Atenção: Cole a URL do Apps Script no código fonte!");
-        return;
-      }
       document.getElementById('loading-msg').style.display = 'block';
-      
       try {
         const response = await fetch(APPS_SCRIPT_URL);
         const dados = await response.json();
         preencherSelects(dados);
-        
         document.getElementById('cliente').disabled = false;
         document.getElementById('mercadoria').disabled = false;
         document.getElementById('btnAdicionar').disabled = false;
@@ -322,10 +239,20 @@
     function preencherSelects(dados) {
       const selectCliente = document.getElementById('cliente');
       const selectMercadoria = document.getElementById('mercadoria');
+      const selectVendedor = document.getElementById('vendedor'); // O NOVO SELECT
+      
       selectCliente.innerHTML = '<option value="">Selecione o Cliente</option>';
       dados.clientes.forEach(c => selectCliente.innerHTML += `<option value="${c}">${c}</option>`);
+      
       selectMercadoria.innerHTML = '<option value="">Selecione a Mercadoria</option>';
       dados.mercadorias.forEach(m => selectMercadoria.innerHTML += `<option value="${m.nome}" data-cod="${m.codigo}">${m.nome}</option>`);
+      
+      // PREENCHE OS VENDEDORES E HABILITA O CAMPO
+      if(dados.vendedores) {
+        selectVendedor.innerHTML = '<option value="">Selecione o Vendedor</option>';
+        dados.vendedores.forEach(v => selectVendedor.innerHTML += `<option value="${v}">${v}</option>`);
+        selectVendedor.disabled = false;
+      }
     }
 
     function atualizarCodigo() {
@@ -354,7 +281,6 @@
       itensFrete.push({ codigo, mercadoria, quantidade, valorUnitario, subtotal });
       atualizarTabela();
 
-      // Limpa os campos e joga o foco de volta na Mercadoria para agilidade
       document.getElementById('mercadoria').value = "";
       document.getElementById('codigo').value = "";
       document.getElementById('quantidade').value = "1";
@@ -380,14 +306,7 @@
       } else {
         itensFrete.forEach((item, index) => {
           totalGeral += item.subtotal;
-          tbody.innerHTML += `
-            <tr>
-              <td>${item.quantidade}x</td>
-              <td>${item.codigo} - ${item.mercadoria}</td>
-              <td>R$ ${item.subtotal.toFixed(2)}</td>
-              <td><button class="btn-remover" onclick="removerItem(${index})">X</button></td>
-            </tr>
-          `;
+          tbody.innerHTML += `<tr><td>${item.quantidade}x</td><td>${item.codigo} - ${item.mercadoria}</td><td>R$ ${item.subtotal.toFixed(2)}</td><td><button class="btn-remover" onclick="removerItem(${index})">X</button></td></tr>`;
         });
       }
       document.getElementById('totalGeralVisor').innerText = totalGeral.toFixed(2);
@@ -396,21 +315,21 @@
     function abrirRevisao() {
       const cliente = document.getElementById('cliente').value;
       const data = document.getElementById('data').value;
+      const vendedor = document.getElementById('vendedor').value;
       
-      if(!cliente || !data) {
-        alert("Selecione a Data e o Cliente antes de revisar.");
+      if(!cliente || !data || !vendedor) {
+        alert("Selecione a Data, o Cliente e o Vendedor antes de revisar.");
         return;
       }
 
       document.getElementById('rev-data').innerText = data.split('-').reverse().join('/');
       document.getElementById('rev-cliente').innerText = cliente;
+      document.getElementById('rev-vendedor').innerText = vendedor;
       document.getElementById('rev-total').innerText = totalGeral.toFixed(2);
       
       const ul = document.getElementById('rev-lista');
       ul.innerHTML = "";
-      itensFrete.forEach(item => {
-        ul.innerHTML += `<li>${item.quantidade}x ${item.mercadoria} (R$ ${item.valorUnitario.toFixed(2)}/un) = <strong>R$ ${item.subtotal.toFixed(2)}</strong></li>`;
-      });
+      itensFrete.forEach(item => { ul.innerHTML += `<li>${item.quantidade}x ${item.mercadoria} (R$ ${item.valorUnitario.toFixed(2)}/un) = <strong>R$ ${item.subtotal.toFixed(2)}</strong></li>`; });
 
       document.getElementById('modal-revisao').style.display = 'flex';
     }
@@ -427,6 +346,7 @@
       const dadosParaEnvio = {
         data: document.getElementById('data').value,
         cliente: document.getElementById('cliente').value,
+        vendedor: document.getElementById('vendedor').value,
         itens: itensFrete,
         valorTotalGeral: totalGeral
       };
@@ -444,13 +364,11 @@
           itensFrete = [];
           atualizarTabela();
           document.getElementById('cliente').value = "";
+          // Mantém o vendedor e data para agilizar o próximo frete
           document.getElementById('btnRevisar').disabled = true;
           fecharRevisao();
-        } else {
-          alert("Erro ao salvar: " + resultado.mensagem);
-        }
-      } catch (error) {
-        alert("Erro de rede ao salvar.");
+        } else { alert("Erro ao salvar: " + resultado.mensagem); }
+      } catch (error) { alert("Erro de rede ao salvar.");
       } finally {
         btnTermica.textContent = '🖨️ Salvar e Imprimir (Térmica)'; btnTermica.disabled = false;
         btnA4.textContent = '📄 Salvar e Imprimir (Normal A4)'; btnA4.disabled = false;
@@ -459,49 +377,28 @@
 
     function prepararImpressao(dados, tipo) {
       const dataBr = dados.data.split('-').reverse().join('/');
-      
-      // Define qual layout será exibido removendo as classes de impressão antigas e adicionando a nova
       document.body.classList.remove('print-termica', 'print-a4');
       document.body.classList.add('print-' + tipo);
 
       if (tipo === 'termica') {
         document.getElementById('print-t-data').innerText = dataBr;
         document.getElementById('print-t-cliente').innerText = dados.cliente;
+        document.getElementById('print-t-vendedor').innerText = dados.vendedor;
         document.getElementById('print-t-total').innerText = dados.valorTotalGeral.toFixed(2);
         
         const cItens = document.getElementById('print-t-itens-container');
         cItens.innerHTML = "";
-        dados.itens.forEach(item => {
-          cItens.innerHTML += `
-            <div class="cupom-item">
-              <div class="cupom-item-title">${item.codigo} - ${item.mercadoria}</div>
-              <div class="cupom-item-valores">
-                <span>${item.quantidade} x R$ ${item.valorUnitario.toFixed(2)}</span>
-                <strong>R$ ${item.subtotal.toFixed(2)}</strong>
-              </div>
-            </div>`;
-        });
+        dados.itens.forEach(item => { cItens.innerHTML += `<div class="cupom-item"><div class="cupom-item-title">${item.codigo} - ${item.mercadoria}</div><div class="cupom-item-valores"><span>${item.quantidade} x R$ ${item.valorUnitario.toFixed(2)}</span><strong>R$ ${item.subtotal.toFixed(2)}</strong></div></div>`; });
       } else {
-        // Preenche os dados da folha A4 Normal
         document.getElementById('print-a-data').innerText = dataBr;
         document.getElementById('print-a-cliente').innerText = dados.cliente;
+        document.getElementById('print-a-vendedor').innerText = dados.vendedor;
         document.getElementById('print-a-total').innerText = dados.valorTotalGeral.toFixed(2);
         
         const cItensA4 = document.getElementById('print-a-itens-container');
         cItensA4.innerHTML = "";
-        dados.itens.forEach(item => {
-          cItensA4.innerHTML += `
-            <tr>
-              <td>${item.codigo}</td>
-              <td>${item.mercadoria}</td>
-              <td>${item.quantidade}</td>
-              <td>R$ ${item.valorUnitario.toFixed(2)}</td>
-              <td><strong>R$ ${item.subtotal.toFixed(2)}</strong></td>
-            </tr>`;
-        });
+        dados.itens.forEach(item => { cItensA4.innerHTML += `<tr><td>${item.codigo}</td><td>${item.mercadoria}</td><td>${item.quantidade}</td><td>R$ ${item.valorUnitario.toFixed(2)}</td><td><strong>R$ ${item.subtotal.toFixed(2)}</strong></td></tr>`; });
       }
-      
-      // Chama a tela de impressão
       window.print();
     }
   </script>
