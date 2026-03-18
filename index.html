@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lançamento de Frete - Colmeia</title>
+  <style>
+    /* Estilos da Tela */
+    body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; color: #333; }
+    .container { max-width: 500px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: auto; }
+    h2 { text-align: center; color: #333; margin-top: 5px; }
+    .logo-img { max-width: 120px; display: block; margin: 0 auto 15px auto; }
+    label { font-weight: bold; margin-top: 15px; display: block; font-size: 14px; }
+    input, select, button { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
+    input:focus, select:focus { border-color: #f5a623; outline: none; }
+    input[readonly] { background-color: #e9ecef; cursor: not-allowed; } /* Estilo para campos bloqueados */
+    button { background-color: #f5a623; color: #fff; border: none; font-weight: bold; cursor: pointer; margin-top: 25px; transition: background 0.3s; }
+    button:hover { background-color: #e0961a; }
+    button:disabled { background-color: #ccc; cursor: not-allowed; }
+    
+    .linha-dupla { display: flex; gap: 10px; }
+    .linha-dupla > div { flex: 1; }
+
+    #loading-msg { text-align: center; color: #e0961a; font-weight: bold; font-size: 14px; display: none; }
+    #cupom-impressao { display: none; }
+
+    /* Estilos de Impressão (Cupom Térmico 80mm) */
+    @media print {
+      body * { visibility: hidden; }
+      #cupom-impressao, #cupom-impressao * { visibility: visible; }
+      #cupom-impressao {
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 80mm;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 14px;
+        padding: 5px;
+        color: black;
+      }
+      .cupom-header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
+      .cupom-header img { max-width: 80px; margin-bottom: 5px; }
+      .cupom-linha { margin-bottom: 5px; }
+      .cupom-linha strong { display: inline-block; width: 70px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container" id="form-container">
+    <img src="https://cdn-icons-png.flaticon.com/512/2766/2766184.png" alt="Logo Frete Colmeia" class="logo-img">
+    <h2>Controle de Frete</h2>
+    <p id="loading-msg">Conectando ao banco de dados...</p>
+    
+    <form id="freteForm" onsubmit="processarFormulario(event)">
+      <label>Data:</label>
+      <input type="date" id="data" required>
+      
+      <label>Cliente:</label>
+      <select id="cliente" required disabled>
+        <option value="">Aguarde...</option>
+      </select>
+      
+      <label>Mercadoria:</label>
+      <select id="mercadoria" required onchange="atualizarCodigo()" disabled>
+        <option value="">Aguarde...</option>
+      </select>
+      
+      <label>Código da Mercadoria:</label>
+      <input type="text" id="codigo" readonly placeholder="Preenchimento automático">
+      
+      <div class="linha-dupla">
+        <div>
+          <label>Volume (Qtd):</label>
+          <input type="number" id="quantidade" min="1" value="1" required oninput="calcularTotal()">
+        </div>
+        <div>
+          <label>Valor Unitário (R$):</label>
+          <input type="number" id="valorUnitario" step="0.01" required placeholder="0.00" oninput="calcularTotal()">
+        </div>
+      </div>
+      
+      <label>Valor Total Calculado (R$):</label>
+      <input type="number" id="valorTotal" step="0.01" readonly placeholder="0.00">
+      
+      <button type="submit" id="btnSalvar" disabled>Salvar e Imprimir Cupom</button>
+    </form>
+  </div>
+
+  <div id="cupom-impressao">
+    <div class="cupom-header">
+      <img src="https://cdn-icons-png.flaticon.com/512/2766/2766184.png" alt="Logo Frete Colmeia"><br>
+      <strong>CONTROLE DE FRETE COLMEIA</strong>
+    </div>
+    <div class="cupom-linha"><strong>Data:</strong> <span id="print-data"></span></div>
+    <div class="cupom-linha"><strong>Cliente:</strong> <span id="print-cliente"></span></div>
+    <div class="cupom-linha"><strong>Cód:</strong> <span id="print-codigo"></span></div>
+    <div class="cupom-linha"><strong>Item:</strong> <span id="print-mercadoria"></span></div>
+    
+    <div style="border-top: 1px dashed #000; margin: 10px 0; padding-top: 5px;">
+      <div class="cupom-linha"><strong>Vol (Qtd):</strong> <span id="print-qtd"></span></div>
+      <div class="cupom-linha"><strong>V. Unit:</strong> R$ <span id="print-unitario"></span></div>
+      <div style="font-size: 16px; margin-top: 10px;">
+        <strong>TOTAL: R$ <span id="print-valor"></span></strong>
+      </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 25px; font-size: 12px;">
+      Assinatura do Responsável<br><br>
+      _________________________
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // COLE A URL DO SEU APPS SCRIPT ABAIXO
+    // ==========================================
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxKGZwu9eK4nGIUUvFrNlRgdHzeb1_Ql9Ue3KKXjUbK0klEhb_aDVm8fm5P_PTWPaPg/exec'; 
+
+    document.getElementById('data').valueAsDate = new Date();
+
+    window.onload = async function() {
+      if (APPS_SCRIPT_URL === 'COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT') {
+        alert("Atenção: Você esqueceu de colar a URL do Apps Script no código fonte!");
+        return;
+      }
+      document.getElementById('loading-msg').style.display = 'block';
+      
+      try {
+        const response = await fetch(APPS_SCRIPT_URL);
+        const dados = await response.json();
+        preencherSelects(dados);
+        
+        document.getElementById('cliente').disabled = false;
+        document.getElementById('mercadoria').disabled = false;
+        document.getElementById('btnSalvar').disabled = false;
+        document.getElementById('loading-msg').style.display = 'none';
+      } catch (error) {
+        alert("Falha ao conectar com a planilha. Recarregue a página.");
+        document.getElementById('loading-msg').innerText = "Erro de conexão.";
+      }
+    };
+
+    function preencherSelects(dados) {
+      const selectCliente = document.getElementById('cliente');
+      const selectMercadoria = document.getElementById('mercadoria');
+      
+      selectCliente.innerHTML = '<option value="">Selecione o Cliente</option>';
+      dados.clientes.forEach(cliente => selectCliente.innerHTML += `<option value="${cliente}">${cliente}</option>`);
+      
+      selectMercadoria.innerHTML = '<option value="">Selecione a Mercadoria</option>';
+      dados.mercadorias.forEach(item => selectMercadoria.innerHTML += `<option value="${item.nome}" data-cod="${item.codigo}">${item.nome}</option>`);
+    }
+
+    function atualizarCodigo() {
+      const select = document.getElementById('mercadoria');
+      document.getElementById('codigo').value = select.options[select.selectedIndex].getAttribute('data-cod') || '';
+    }
+
+    // Função que calcula o total em tempo real
+    function calcularTotal() {
+      const qtd = parseFloat(document.getElementById('quantidade').value) || 0;
+      const valorUnit = parseFloat(document.getElementById('valorUnitario').value) || 0;
+      const total = qtd * valorUnit;
+      document.getElementById('valorTotal').value = total.toFixed(2);
+    }
+
+    async function processarFormulario(e) {
+      e.preventDefault();
+      
+      // Validação de segurança
+      const totalCalculado = document.getElementById('valorTotal').value;
+      if (!totalCalculado || totalCalculado <= 0) {
+        alert("O Valor Total não pode ser zero.");
+        return;
+      }
+
+      const btn = document.getElementById('btnSalvar');
+      btn.textContent = 'Salvando no Google Sheets...';
+      btn.disabled = true;
+
+      const dadosForm = {
+        data: document.getElementById('data').value,
+        cliente: document.getElementById('cliente').value,
+        mercadoria: document.getElementById('mercadoria').value,
+        codigo: document.getElementById('codigo').value,
+        quantidade: document.getElementById('quantidade').value,
+        valorUnitario: document.getElementById('valorUnitario').value,
+        valorTotal: document.getElementById('valorTotal').value
+      };
+
+      try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(dadosForm)
+        });
+
+        const resultado = await response.json();
+
+        if (resultado.status === "Sucesso") {
+          prepararImpressao(dadosForm);
+          document.getElementById('freteForm').reset();
+          document.getElementById('data').valueAsDate = new Date();
+          document.getElementById('quantidade').value = "1";
+        } else {
+          alert("Erro ao salvar: " + resultado.mensagem);
+        }
+
+      } catch (error) {
+        alert("Ocorreu um erro de rede ao tentar salvar os dados.");
+      } finally {
+        btn.textContent = 'Salvar e Imprimir Cupom';
+        btn.disabled = false;
+      }
+    }
+
+    function prepararImpressao(dados) {
+      document.getElementById('print-data').innerText = dados.data.split('-').reverse().join('/');
+      document.getElementById('print-cliente').innerText = dados.cliente;
+      document.getElementById('print-codigo').innerText = dados.codigo;
+      document.getElementById('print-mercadoria').innerText = dados.mercadoria;
+      
+      // Novos campos na impressão
+      document.getElementById('print-qtd').innerText = dados.quantidade;
+      document.getElementById('print-unitario').innerText = parseFloat(dados.valorUnitario).toFixed(2);
+      document.getElementById('print-valor').innerText = parseFloat(dados.valorTotal).toFixed(2);
+      
+      window.print();
+    }
+  </script>
+</body>
+</html>
