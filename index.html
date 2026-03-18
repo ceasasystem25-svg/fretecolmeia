@@ -6,14 +6,21 @@
   <title>Lançamento de Frete - Colmeia</title>
   <style>
     /* Estilos Gerais */
-    body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; color: #333; margin: 0; }
+    body { 
+      font-family: Arial, sans-serif; 
+      background-color: #f4f4f9; 
+      padding: 20px; 
+      color: #333; 
+      margin: 0; 
+      padding-bottom: 100px; 
+    }
     .container { max-width: 600px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: auto; }
     h2, h3 { text-align: center; color: #333; margin-top: 5px; }
     .logo-img { max-width: 120px; display: block; margin: 0 auto 15px auto; }
     
     label { font-weight: bold; margin-top: 15px; display: block; font-size: 14px; }
     input, select, button { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-    input:focus, select:focus { border-color: #f5a623; outline: none; }
+    input:focus, select:focus { border-color: #f5a623; outline: none; box-shadow: 0 0 5px rgba(245, 166, 35, 0.5); }
     input[readonly] { background-color: #e9ecef; cursor: not-allowed; } 
     
     button { background-color: #f5a623; color: #fff; border: none; font-weight: bold; cursor: pointer; transition: background 0.3s; padding: 12px; }
@@ -22,13 +29,18 @@
     
     .btn-adicionar { background-color: #28a745; margin-top: 15px; }
     .btn-adicionar:hover { background-color: #218838; }
-    .btn-revisar { background-color: #007bff; margin-top: 25px; font-size: 16px; }
+    
+    .barra-fixa-rodape {
+      position: fixed; bottom: 0; left: 0; width: 100%; background-color: white;
+      box-shadow: 0 -4px 10px rgba(0,0,0,0.15); padding: 15px 20px; box-sizing: border-box;
+      display: flex; justify-content: center; z-index: 900;
+    }
+    .btn-revisar { background-color: #007bff; font-size: 16px; max-width: 600px; margin: 0; }
     .btn-revisar:hover { background-color: #0069d9; }
     
     .linha-dupla { display: flex; gap: 10px; }
     .linha-dupla > div { flex: 1; }
 
-    /* Tabela de Itens */
     .tabela-container { margin-top: 20px; overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 15px; }
     th, td { border-bottom: 1px solid #ddd; padding: 8px; text-align: left; }
@@ -36,20 +48,29 @@
     .btn-remover { background-color: #dc3545; color: white; padding: 4px 8px; font-size: 11px; border: none; border-radius: 4px; cursor: pointer; width: auto; margin:0;}
     .total-geral-box { font-size: 18px; font-weight: bold; text-align: right; color: #d32f2f; margin-top: 10px; }
 
-    /* Modal de Revisão */
     #modal-revisao { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
     .modal-content { background: white; width: 90%; max-width: 500px; padding: 20px; border-radius: 8px; max-height: 90vh; overflow-y: auto; }
     .resumo-linha { margin-bottom: 8px; font-size: 15px; }
     .btn-fechar-modal { background-color: #6c757d; margin-top: 10px; }
+    .botoes-impressao { display: flex; gap: 10px; margin-top: 20px; }
+    .botoes-impressao button { margin: 0; }
 
     #loading-msg { text-align: center; color: #e0961a; font-weight: bold; font-size: 14px; display: none; }
-    #cupom-impressao { display: none; }
+    
+    /* Esconde as áreas de impressão na tela normal */
+    #cupom-impressao, #a4-impressao { display: none; }
 
-    /* Estilos de Impressão (Cupom Térmico 80mm) */
+    /* ==================================================
+       ESTILOS DE IMPRESSÃO (TÉRMICA E A4)
+       ================================================== */
     @media print {
       body * { visibility: hidden; }
-      #cupom-impressao, #cupom-impressao * { visibility: visible; }
-      #cupom-impressao {
+      body { background-color: white; margin: 0; padding: 0; }
+      .barra-fixa-rodape { display: none !important; }
+
+      /* IMPRESSÃO TÉRMICA (80mm) */
+      body.print-termica #cupom-impressao, body.print-termica #cupom-impressao * { visibility: visible; }
+      body.print-termica #cupom-impressao {
         display: block; position: absolute; left: 0; top: 0; width: 80mm;
         font-family: 'Courier New', Courier, monospace; font-size: 14px; padding: 5px;
         color: #000000 !important; font-weight: 900 !important;
@@ -62,6 +83,26 @@
       .cupom-item-title { font-weight: bold; }
       .cupom-item-valores { display: flex; justify-content: space-between; font-size: 13px; }
       .cupom-total { border-top: 2px dashed #000; margin-top: 10px; padding-top: 10px; font-size: 16px; text-align: right; font-weight: bold; }
+
+      /* IMPRESSÃO A4 (Normal) */
+      body.print-a4 #a4-impressao, body.print-a4 #a4-impressao * { visibility: visible; }
+      body.print-a4 #a4-impressao {
+        display: block; position: absolute; left: 0; top: 0; width: 100%;
+        font-family: Arial, sans-serif; font-size: 14px; padding: 20px;
+        color: #000000 !important;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+      }
+      .a4-header-container { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
+      .a4-header-container img { max-width: 150px; }
+      .a4-titulo { text-align: right; }
+      .a4-titulo h1 { margin: 0; font-size: 24px; text-transform: uppercase; }
+      .a4-dados-cliente { background-color: #f8f9fa; padding: 15px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 20px; }
+      .a4-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+      .a4-table th, .a4-table td { border: 1px solid #000; padding: 10px; text-align: left; }
+      .a4-table th { background-color: #eee; font-weight: bold; }
+      .a4-total { text-align: right; font-size: 20px; font-weight: bold; padding-top: 10px; border-top: 2px solid #000; }
+      .a4-assinatura { text-align: center; margin-top: 80px; }
+      .a4-assinatura div { width: 300px; border-top: 1px solid #000; margin: 0 auto; padding-top: 5px; }
     }
   </style>
 </head>
@@ -76,11 +117,11 @@
       <div class="linha-dupla">
         <div>
           <label style="margin-top:0;">Data:</label>
-          <input type="date" id="data" required>
+          <input type="date" id="data" class="nav-enter" required>
         </div>
         <div>
           <label style="margin-top:0;">Cliente:</label>
-          <select id="cliente" required disabled>
+          <select id="cliente" class="nav-enter" required disabled>
             <option value="">Aguarde...</option>
           </select>
         </div>
@@ -89,28 +130,28 @@
 
     <div style="border-left: 4px solid #f5a623; padding-left: 15px;">
       <label style="margin-top:0;">Mercadoria:</label>
-      <select id="mercadoria" onchange="atualizarCodigo()" disabled>
+      <select id="mercadoria" class="nav-enter" onchange="atualizarCodigo()" disabled>
         <option value="">Aguarde...</option>
       </select>
       
       <label>Código da Mercadoria:</label>
-      <input type="text" id="codigo" readonly placeholder="Preenchimento automático">
+      <input type="text" id="codigo" readonly placeholder="Automático">
       
       <div class="linha-dupla">
         <div>
           <label>Volume (Qtd):</label>
-          <input type="number" id="quantidade" min="1" value="1" oninput="calcularSubtotal()">
+          <input type="number" id="quantidade" class="nav-enter" min="1" value="1" oninput="calcularSubtotal()">
         </div>
         <div>
           <label>V. Unitário (R$):</label>
-          <input type="number" id="valorUnitario" step="0.01" placeholder="0.00" oninput="calcularSubtotal()">
+          <input type="number" id="valorUnitario" class="nav-enter" step="0.01" placeholder="0.00" oninput="calcularSubtotal()">
         </div>
       </div>
       
       <label>Subtotal (R$):</label>
       <input type="number" id="subtotal" step="0.01" readonly placeholder="0.00">
       
-      <button type="button" class="btn-adicionar" id="btnAdicionar" onclick="adicionarItem()" disabled>+ Adicionar à Lista</button>
+      <button type="button" class="btn-adicionar nav-enter" id="btnAdicionar" onclick="adicionarItem()" disabled>+ Adicionar à Lista (Enter)</button>
     </div>
 
     <div class="tabela-container">
@@ -129,8 +170,10 @@
       </table>
       <div class="total-geral-box">Total Geral: R$ <span id="totalGeralVisor">0.00</span></div>
     </div>
+  </div>
 
-    <button type="button" class="btn-revisar" id="btnRevisar" onclick="abrirRevisao()" disabled>Revisar e Concluir Frete</button>
+  <div class="barra-fixa-rodape">
+    <button type="button" class="btn-revisar nav-enter" id="btnRevisar" onclick="abrirRevisao()" disabled>Revisar e Concluir Frete</button>
   </div>
 
   <div id="modal-revisao">
@@ -146,8 +189,11 @@
         Total a Pagar: R$ <span id="rev-total"></span>
       </div>
 
-      <button type="button" id="btnSalvar" onclick="processarEnvio()">Confirmar, Salvar e Imprimir</button>
-      <button type="button" class="btn-fechar-modal" onclick="fecharRevisao()">Voltar e Editar</button>
+      <div class="botoes-impressao">
+        <button type="button" id="btnSalvarTermica" onclick="processarEnvio('termica')" style="background-color: #343a40;">🖨️ Salvar e Imprimir (Térmica)</button>
+        <button type="button" id="btnSalvarA4" onclick="processarEnvio('a4')" style="background-color: #17a2b8;">📄 Salvar e Imprimir (Normal A4)</button>
+      </div>
+      <button type="button" class="btn-fechar-modal" onclick="fecharRevisao()" style="width: 100%;">Voltar e Editar</button>
     </div>
   </div>
 
@@ -157,36 +203,80 @@
       <strong>CONTROLE DE FRETE COLMEIA</strong>
     </div>
     <div class="cupom-info">
-      <div><strong>Data:</strong> <span id="print-data"></span></div>
-      <div><strong>Cliente:</strong> <span id="print-cliente"></span></div>
+      <div><strong>Data:</strong> <span id="print-t-data"></span></div>
+      <div><strong>Cliente:</strong> <span id="print-t-cliente"></span></div>
     </div>
-    
     <div style="border-top: 2px dashed #000; padding-top: 10px; margin-bottom: 10px;">
       <strong>ITENS DO FRETE:</strong>
     </div>
-    
-    <div id="print-itens-container"></div>
-    
+    <div id="print-t-itens-container"></div>
     <div class="cupom-total">
-      TOTAL GERAL: R$ <span id="print-total"></span>
+      TOTAL GERAL: R$ <span id="print-t-total"></span>
     </div>
-    
     <div style="text-align: center; margin-top: 35px; font-size: 12px;">
-      Assinatura do Responsável<br><br>
-      _________________________
+      Assinatura do Responsável<br><br>_________________________
+    </div>
+  </div>
+
+  <div id="a4-impressao">
+    <div class="a4-header-container">
+      <div><img src="https://cdn-icons-png.flaticon.com/512/2766/2766184.png" alt="Logo"></div>
+      <div class="a4-titulo">
+        <h1>Controle de Frete Colmeia</h1>
+        <p>Recibo de Lançamento e Transporte</p>
+      </div>
+    </div>
+    <div class="a4-dados-cliente">
+      <strong>Data do Lançamento:</strong> <span id="print-a-data"></span><br><br>
+      <strong>Nome do Cliente:</strong> <span id="print-a-cliente"></span>
+    </div>
+    <table class="a4-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Descrição da Mercadoria</th>
+          <th>Volume (Qtd)</th>
+          <th>Valor Unitário</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody id="print-a-itens-container"></tbody>
+    </table>
+    <div class="a4-total">
+      TOTAL A PAGAR: R$ <span id="print-a-total"></span>
+    </div>
+    <div class="a4-assinatura">
+      <div>Assinatura do Responsável</div>
     </div>
   </div>
 
   <script>
     // ==========================================
-    // COLE A URL NOVA DO SEU APPS SCRIPT ABAIXO
+    // COLE A URL DO SEU APPS SCRIPT ABAIXO
     // ==========================================
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJeF-Fgdv8NA3-DB9psQHe_EBZYv_kXW2viWDuw9vq_R3tmRCVj13C8d6fggQ_7o5t/exec'; 
 
-    let itensFrete = []; // Lista que vai guardar os produtos
+    let itensFrete = []; 
     let totalGeral = 0;
 
     document.getElementById('data').valueAsDate = new Date();
+
+    // Lógica para o ENTER pular de campo
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter') {
+        const elementosNav = Array.from(document.querySelectorAll('.nav-enter:not([disabled])'));
+        const indexAtivo = elementosNav.indexOf(document.activeElement);
+        
+        if (indexAtivo > -1) {
+          event.preventDefault(); // Impede o envio acidental de formulário
+          if (document.activeElement.id === 'btnAdicionar') {
+            adicionarItem(); // Se o enter for no botão adicionar, ele adiciona direto
+          } else if (indexAtivo < elementosNav.length - 1) {
+            elementosNav[indexAtivo + 1].focus(); // Pula pro próximo campo
+          }
+        }
+      }
+    });
 
     window.onload = async function() {
       if (APPS_SCRIPT_URL === 'COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT') {
@@ -230,7 +320,6 @@
       document.getElementById('subtotal').value = (qtd * valorUnit).toFixed(2);
     }
 
-    // --- LÓGICA DO CARRINHO ---
     function adicionarItem() {
       const mercadoria = document.getElementById('mercadoria').value;
       const codigo = document.getElementById('codigo').value;
@@ -239,29 +328,27 @@
       const subtotal = parseFloat(document.getElementById('subtotal').value);
 
       if (!mercadoria || !quantidade || !valorUnitario || subtotal <= 0) {
-        alert("Preencha corretamente a mercadoria, quantidade e valor unitário.");
+        alert("Preencha a mercadoria, quantidade e valor unitário.");
         return;
       }
 
-      // Adiciona na lista
       itensFrete.push({ codigo, mercadoria, quantidade, valorUnitario, subtotal });
       atualizarTabela();
 
-      // Limpa os campos de produto para o próximo (mantém data e cliente)
+      // Limpa os campos e joga o foco de volta na Mercadoria para agilidade
       document.getElementById('mercadoria').value = "";
       document.getElementById('codigo').value = "";
       document.getElementById('quantidade').value = "1";
       document.getElementById('valorUnitario').value = "";
       document.getElementById('subtotal').value = "";
       document.getElementById('btnRevisar').disabled = false;
+      document.getElementById('mercadoria').focus(); 
     }
 
     function removerItem(index) {
       itensFrete.splice(index, 1);
       atualizarTabela();
-      if (itensFrete.length === 0) {
-        document.getElementById('btnRevisar').disabled = true;
-      }
+      if (itensFrete.length === 0) { document.getElementById('btnRevisar').disabled = true; }
     }
 
     function atualizarTabela() {
@@ -287,7 +374,6 @@
       document.getElementById('totalGeralVisor').innerText = totalGeral.toFixed(2);
     }
 
-    // --- LÓGICA DE REVISÃO ---
     function abrirRevisao() {
       const cliente = document.getElementById('cliente').value;
       const data = document.getElementById('data').value;
@@ -297,7 +383,6 @@
         return;
       }
 
-      // Preenche os dados do modal
       document.getElementById('rev-data').innerText = data.split('-').reverse().join('/');
       document.getElementById('rev-cliente').innerText = cliente;
       document.getElementById('rev-total').innerText = totalGeral.toFixed(2);
@@ -311,20 +396,19 @@
       document.getElementById('modal-revisao').style.display = 'flex';
     }
 
-    function fecharRevisao() {
-      document.getElementById('modal-revisao').style.display = 'none';
-    }
+    function fecharRevisao() { document.getElementById('modal-revisao').style.display = 'none'; }
 
-    // --- LÓGICA DE ENVIO E IMPRESSÃO ---
-    async function processarEnvio() {
-      const btn = document.getElementById('btnSalvar');
-      btn.textContent = 'Salvando...';
-      btn.disabled = true;
+    async function processarEnvio(tipoImpressao) {
+      const btnTermica = document.getElementById('btnSalvarTermica');
+      const btnA4 = document.getElementById('btnSalvarA4');
+      
+      btnTermica.textContent = 'Salvando...'; btnTermica.disabled = true;
+      btnA4.textContent = 'Aguarde...'; btnA4.disabled = true;
 
       const dadosParaEnvio = {
         data: document.getElementById('data').value,
         cliente: document.getElementById('cliente').value,
-        itens: itensFrete, // Envia a lista toda
+        itens: itensFrete,
         valorTotalGeral: totalGeral
       };
 
@@ -337,8 +421,7 @@
         const resultado = await response.json();
 
         if (resultado.status === "Sucesso") {
-          prepararImpressao(dadosParaEnvio);
-          // Reseta tudo após imprimir
+          prepararImpressao(dadosParaEnvio, tipoImpressao);
           itensFrete = [];
           atualizarTabela();
           document.getElementById('cliente').value = "";
@@ -350,32 +433,56 @@
       } catch (error) {
         alert("Erro de rede ao salvar.");
       } finally {
-        btn.textContent = 'Confirmar, Salvar e Imprimir';
-        btn.disabled = false;
+        btnTermica.textContent = '🖨️ Salvar e Imprimir (Térmica)'; btnTermica.disabled = false;
+        btnA4.textContent = '📄 Salvar e Imprimir (Normal A4)'; btnA4.disabled = false;
       }
     }
 
-    function prepararImpressao(dados) {
-      document.getElementById('print-data').innerText = dados.data.split('-').reverse().join('/');
-      document.getElementById('print-cliente').innerText = dados.cliente;
-      document.getElementById('print-total').innerText = dados.valorTotalGeral.toFixed(2);
+    function prepararImpressao(dados, tipo) {
+      const dataBr = dados.data.split('-').reverse().join('/');
       
-      // Gera a lista de itens no cupom térmico
-      const containerItens = document.getElementById('print-itens-container');
-      containerItens.innerHTML = "";
+      // Define qual layout será exibido removendo as classes de impressão antigas e adicionando a nova
+      document.body.classList.remove('print-termica', 'print-a4');
+      document.body.classList.add('print-' + tipo);
+
+      if (tipo === 'termica') {
+        document.getElementById('print-t-data').innerText = dataBr;
+        document.getElementById('print-t-cliente').innerText = dados.cliente;
+        document.getElementById('print-t-total').innerText = dados.valorTotalGeral.toFixed(2);
+        
+        const cItens = document.getElementById('print-t-itens-container');
+        cItens.innerHTML = "";
+        dados.itens.forEach(item => {
+          cItens.innerHTML += `
+            <div class="cupom-item">
+              <div class="cupom-item-title">${item.codigo} - ${item.mercadoria}</div>
+              <div class="cupom-item-valores">
+                <span>${item.quantidade} x R$ ${item.valorUnitario.toFixed(2)}</span>
+                <strong>R$ ${item.subtotal.toFixed(2)}</strong>
+              </div>
+            </div>`;
+        });
+      } else {
+        // Preenche os dados da folha A4 Normal
+        document.getElementById('print-a-data').innerText = dataBr;
+        document.getElementById('print-a-cliente').innerText = dados.cliente;
+        document.getElementById('print-a-total').innerText = dados.valorTotalGeral.toFixed(2);
+        
+        const cItensA4 = document.getElementById('print-a-itens-container');
+        cItensA4.innerHTML = "";
+        dados.itens.forEach(item => {
+          cItensA4.innerHTML += `
+            <tr>
+              <td>${item.codigo}</td>
+              <td>${item.mercadoria}</td>
+              <td>${item.quantidade}</td>
+              <td>R$ ${item.valorUnitario.toFixed(2)}</td>
+              <td><strong>R$ ${item.subtotal.toFixed(2)}</strong></td>
+            </tr>`;
+        });
+      }
       
-      dados.itens.forEach(item => {
-        containerItens.innerHTML += `
-          <div class="cupom-item">
-            <div class="cupom-item-title">${item.codigo} - ${item.mercadoria}</div>
-            <div class="cupom-item-valores">
-              <span>${item.quantidade} x R$ ${item.valorUnitario.toFixed(2)}</span>
-              <strong>R$ ${item.subtotal.toFixed(2)}</strong>
-            </div>
-          </div>
-        `;
-      });
-      
+      // Chama a tela de impressão
       window.print();
     }
   </script>
