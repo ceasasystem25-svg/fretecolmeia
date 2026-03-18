@@ -110,9 +110,7 @@
         </div>
       </div>
       <label>Vendedor:</label>
-      <select id="vendedor" class="nav-enter" required disabled>
-        <option value="">Aguarde...</option>
-      </select>
+      <select id="vendedor" class="nav-enter" required disabled><option value="">Aguarde...</option></select>
     </div>
 
     <div style="border-left: 4px solid #f5a623; padding-left: 15px;">
@@ -135,8 +133,8 @@
 
     <div class="tabela-container">
       <table>
-        <thead><tr><th>Qtd</th><th>Mercadoria</th><th>Total</th><th></th></tr></thead>
-        <tbody id="lista-itens"><tr><td colspan="4" style="text-align:center; color:#777;">Nenhum produto adicionado</td></tr></tbody>
+        <thead><tr><th>Qtd</th><th>Mercadoria</th><th>V. Unit.</th><th>Total</th><th></th></tr></thead>
+        <tbody id="lista-itens"><tr><td colspan="5" style="text-align:center; color:#777;">Nenhum produto adicionado</td></tr></tbody>
       </table>
       <div class="total-geral-box">Total Geral: R$ <span id="totalGeralVisor">0.00</span></div>
     </div>
@@ -154,7 +152,10 @@
       <div class="resumo-linha"><strong>Vendedor:</strong> <span id="rev-vendedor"></span></div>
       
       <h4 style="margin: 15px 0 5px 0;">Produtos:</h4>
-      <ul id="rev-lista" style="margin: 0; padding-left: 20px; font-size: 14px; margin-bottom: 15px;"></ul>
+      <table style="width:100%; border-collapse: collapse; font-size:14px; margin-bottom:15px; border:1px solid #ddd;">
+        <thead style="background:#f8f9fa;"><tr><th style="padding:5px; border:1px solid #ddd;">Qtd</th><th style="padding:5px; border:1px solid #ddd;">Item</th><th style="padding:5px; border:1px solid #ddd;">V.Unit</th><th style="padding:5px; border:1px solid #ddd;">Total</th></tr></thead>
+        <tbody id="rev-lista-tbody"></tbody>
+      </table>
       
       <div style="font-size: 18px; font-weight: bold; text-align: right; color: #d32f2f;">Total a Pagar: R$ <span id="rev-total"></span></div>
 
@@ -199,7 +200,7 @@
 
   <script>
     // ==========================================
-    // COLE A SUA NOVA URL DO APPS SCRIPT ABAIXO
+    // COLE A SUA URL DO APPS SCRIPT ABAIXO
     // ==========================================
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx8Dnfewt5MZ12vMyTDxHhCnCbydq9m0W_lSqMLK4-PFxUvThDayq0Rm4wRcD5ZUVfY/exec'; 
 
@@ -239,7 +240,7 @@
     function preencherSelects(dados) {
       const selectCliente = document.getElementById('cliente');
       const selectMercadoria = document.getElementById('mercadoria');
-      const selectVendedor = document.getElementById('vendedor'); // O NOVO SELECT
+      const selectVendedor = document.getElementById('vendedor');
       
       selectCliente.innerHTML = '<option value="">Selecione o Cliente</option>';
       dados.clientes.forEach(c => selectCliente.innerHTML += `<option value="${c}">${c}</option>`);
@@ -247,7 +248,6 @@
       selectMercadoria.innerHTML = '<option value="">Selecione a Mercadoria</option>';
       dados.mercadorias.forEach(m => selectMercadoria.innerHTML += `<option value="${m.nome}" data-cod="${m.codigo}">${m.nome}</option>`);
       
-      // PREENCHE OS VENDEDORES E HABILITA O CAMPO
       if(dados.vendedores) {
         selectVendedor.innerHTML = '<option value="">Selecione o Vendedor</option>';
         dados.vendedores.forEach(v => selectVendedor.innerHTML += `<option value="${v}">${v}</option>`);
@@ -302,11 +302,18 @@
       totalGeral = 0;
 
       if (itensFrete.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#777;">Nenhum produto adicionado</td></tr>';
+        // AJUSTADO O COLSPAN PARA 5
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#777;">Nenhum produto adicionado</td></tr>';
       } else {
         itensFrete.forEach((item, index) => {
           totalGeral += item.subtotal;
-          tbody.innerHTML += `<tr><td>${item.quantidade}x</td><td>${item.codigo} - ${item.mercadoria}</td><td>R$ ${item.subtotal.toFixed(2)}</td><td><button class="btn-remover" onclick="removerItem(${index})">X</button></td></tr>`;
+          tbody.innerHTML += `<tr>
+            <td>${item.quantidade}x</td>
+            <td>${item.codigo} - ${item.mercadoria}</td>
+            <td>R$ ${item.valorUnitario.toFixed(2)}</td>
+            <td>R$ ${item.subtotal.toFixed(2)}</td>
+            <td><button class="btn-remover" onclick="removerItem(${index})">X</button></td>
+          </tr>`;
         });
       }
       document.getElementById('totalGeralVisor').innerText = totalGeral.toFixed(2);
@@ -327,9 +334,16 @@
       document.getElementById('rev-vendedor').innerText = vendedor;
       document.getElementById('rev-total').innerText = totalGeral.toFixed(2);
       
-      const ul = document.getElementById('rev-lista');
-      ul.innerHTML = "";
-      itensFrete.forEach(item => { ul.innerHTML += `<li>${item.quantidade}x ${item.mercadoria} (R$ ${item.valorUnitario.toFixed(2)}/un) = <strong>R$ ${item.subtotal.toFixed(2)}</strong></li>`; });
+      const tbody = document.getElementById('rev-lista-tbody');
+      tbody.innerHTML = "";
+      itensFrete.forEach(item => { 
+        tbody.innerHTML += `<tr>
+          <td style="padding:5px; border:1px solid #ddd; text-align:center;">${item.quantidade}x</td>
+          <td style="padding:5px; border:1px solid #ddd;">${item.mercadoria}</td>
+          <td style="padding:5px; border:1px solid #ddd;">R$ ${item.valorUnitario.toFixed(2)}</td>
+          <td style="padding:5px; border:1px solid #ddd;"><strong>R$ ${item.subtotal.toFixed(2)}</strong></td>
+        </tr>`; 
+      });
 
       document.getElementById('modal-revisao').style.display = 'flex';
     }
@@ -364,7 +378,6 @@
           itensFrete = [];
           atualizarTabela();
           document.getElementById('cliente').value = "";
-          // Mantém o vendedor e data para agilizar o próximo frete
           document.getElementById('btnRevisar').disabled = true;
           fecharRevisao();
         } else { alert("Erro ao salvar: " + resultado.mensagem); }
