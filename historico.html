@@ -187,7 +187,7 @@
 
   <script>
     // ==========================================
-    // COLE A SUA NOVA URL DO APPS SCRIPT AQUI
+    // COLE A SUA URL DO APPS SCRIPT AQUI
     // ==========================================
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQDc-ilfch6OiY7egL9T8OSTdsWQmpJaWqYt2Kv_IOYIRYRl6wo8wZXEkkYJAFoqBG/exec'; 
 
@@ -230,12 +230,14 @@
 
     function agruparFretes(registros) {
       registros.forEach(r => {
-        const chave = r.data + "|" + r.cliente;
+        // Corta a data no "T" para limpar qualquer lixo de fuso horário
+        const dataLimpa = r.data.split('T')[0];
+        const chave = dataLimpa + "|" + r.cliente;
         
         if (!fretesAgrupados[chave]) {
           fretesAgrupados[chave] = {
             chave: chave,
-            data: r.data,
+            data: dataLimpa, // Guarda a data limpa
             cliente: r.cliente,
             itens: [],
             linhasNaPlanilha: [], 
@@ -259,6 +261,7 @@
       }
 
       lista.forEach(frete => {
+        // Agora a dataLimpa é formatada corretamente para DD/MM/AAAA
         const dataBr = frete.data.split('-').reverse().join('/');
         tbody.innerHTML += `
           <tr>
