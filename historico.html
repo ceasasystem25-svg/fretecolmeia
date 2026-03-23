@@ -4,13 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Histórico de Fretes - Colmeia</title>
-  <style id="print-page-style"></style> <style>
+  <style id="print-page-style"></style> 
+  <style>
     body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; color: #333; margin: 0; }
     .container { max-width: 800px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: auto; }
     h2 { text-align: center; color: #333; margin-top: 5px; }
     .logo-img { max-width: 120px; display: block; margin: 0 auto 15px auto; }
     button { background-color: #f5a623; color: #fff; border: none; font-weight: bold; cursor: pointer; transition: background 0.3s; padding: 10px 15px; border-radius: 6px; }
     button:hover { background-color: #e0961a; }
+    
+    /* Novos Estilos: Barra de Filtros */
+    .filtro-container { display: flex; gap: 10px; align-items: flex-end; background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #e9ecef; flex-wrap: wrap;}
+    .filtro-container > div { flex: 1; min-width: 130px; }
+    .filtro-container label { font-weight: bold; display: block; font-size: 13px; margin-bottom: 5px; }
+    .filtro-container input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;}
+    .btn-filtrar { background-color: #007bff; } .btn-filtrar:hover { background-color: #0056b3; }
+    .btn-limpar { background-color: #6c757d; } .btn-limpar:hover { background-color: #5a6268; }
+    .btn-relatorio { background-color: #28a745; width: 100%; margin-top: 10px;} .btn-relatorio:hover { background-color: #218838; }
+
     .tabela-container { margin-top: 20px; overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 15px; }
     th, td { border-bottom: 1px solid #ddd; padding: 12px; text-align: left; }
@@ -28,7 +39,9 @@
     .btn-fechar { background-color: #6c757d; }
     
     #loading-msg { text-align: center; color: #e0961a; font-weight: bold; font-size: 16px; margin: 20px 0; display: none; }
-    #cupom-impressao, #a4-impressao { display: none; }
+    
+    /* Oculta áreas de impressão na tela */
+    #cupom-impressao, #a4-impressao, #relatorio-impressao { display: none; }
 
     @media print {
       body { background-color: white; margin: 0; padding: 0; }
@@ -40,7 +53,7 @@
         font-family: 'Courier New', Courier, monospace; font-size: 14px; 
         color: #000000 !important; font-weight: 900 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact;
       }
-      body.print-termica #a4-impressao { display: none !important; }
+      body.print-termica #a4-impressao, body.print-termica #relatorio-impressao { display: none !important; }
       .cupom-header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
       .cupom-header img { max-width: 80px; margin-bottom: 5px; filter: grayscale(100%) contrast(200%); }
       .cupom-info { margin-bottom: 10px; }
@@ -54,7 +67,16 @@
         display: block; width: 100%; font-family: Arial, sans-serif; font-size: 14px; padding: 0;
         color: #000000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact;
       }
-      body.print-a4 #cupom-impressao { display: none !important; }
+      body.print-a4 #cupom-impressao, body.print-a4 #relatorio-impressao { display: none !important; }
+
+      /* NOVO: RELATÓRIO A4 */
+      body.print-relatorio #relatorio-impressao {
+        display: block; width: 100%; font-family: Arial, sans-serif; font-size: 14px; padding: 0;
+        color: #000000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact;
+      }
+      body.print-relatorio #cupom-impressao, body.print-relatorio #a4-impressao { display: none !important; }
+
+      /* Estilos Compartilhados para A4 e Relatório */
       .a4-header-container { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
       .a4-header-container img { max-width: 150px; }
       .a4-titulo { text-align: right; }
@@ -76,6 +98,23 @@
     <a href="index.html" class="btn-voltar">← Voltar para Lançamentos</a>
     <img src="https://i.postimg.cc/5t29QDKd/logo.png" alt="Logo Frete Colmeia" class="logo-img">
     <h2>Histórico de Fretes Lançados</h2>
+    
+    <div class="filtro-container">
+      <div>
+        <label>Data Inicial:</label>
+        <input type="date" id="data-inicio">
+      </div>
+      <div>
+        <label>Data Final:</label>
+        <input type="date" id="data-fim">
+      </div>
+      <div>
+        <button class="btn-filtrar" onclick="aplicarFiltro()">🔍 Filtrar</button>
+        <button class="btn-limpar" onclick="limparFiltro()">Limpar</button>
+      </div>
+      <button class="btn-relatorio" onclick="imprimirRelatorio()">🖨️ Imprimir Relatório Geral</button>
+    </div>
+
     <p id="loading-msg">Carregando banco de dados...</p>
     
     <div class="tabela-container">
@@ -83,6 +122,10 @@
         <thead><tr><th>Data</th><th>Cliente</th><th>Vendedor</th><th>Valor Total</th><th>Ação</th></tr></thead>
         <tbody id="lista-historico"></tbody>
       </table>
+      
+      <div style="text-align: right; font-size: 16px; font-weight: bold; margin-top: 15px; color: #d32f2f;">
+        Total na Tela: R$ <span id="visor-total-tela">0.00</span>
+      </div>
     </div>
   </div>
 
@@ -148,20 +191,32 @@
     <div class="a4-assinatura"><div>Assinatura do Responsável</div></div>
   </div>
 
+  <div id="relatorio-impressao">
+    <div class="a4-header-container">
+      <div><img src="https://i.postimg.cc/5t29QDKd/logo.png" alt="Logo"></div>
+      <div class="a4-titulo">
+        <h1>Relatório de Fretes</h1>
+        <p>Período: <span id="rel-periodo"></span></p>
+      </div>
+    </div>
+    <table class="a4-table">
+      <thead><tr><th>Data</th><th>Cliente</th><th>Vendedor</th><th>Valor Total</th></tr></thead>
+      <tbody id="rel-tabela-body"></tbody>
+    </table>
+    <div class="a4-total">SOMA TOTAL DO PERÍODO: R$ <span id="rel-total-geral"></span></div>
+  </div>
+
   <script>
     // ==========================================
-    // COLE A SUA URL DO APPS SCRIPT AQUI
-    // ==========================================
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx8Dnfewt5MZ12vMyTDxHhCnCbydq9m0W_lSqMLK4-PFxUvThDayq0Rm4wRcD5ZUVfY/exec'; 
+    // ==========================================
 
     let fretesAgrupados = {};
+    let listaFretesProcessados = []; // Guarda todos os fretes brutos do Sheets
+    let listaFretesVisiveis = []; // Guarda os fretes que passaram pelo filtro
     let freteAberto = null;
 
     window.onload = async function() {
-      if (APPS_SCRIPT_URL === 'COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT' || APPS_SCRIPT_URL === 'COLE_AQUI_A_NOVA_URL') {
-        alert("Atenção: Cole a URL do Apps Script no código fonte do Histórico!");
-        return;
-      }
       carregarHistorico();
     };
 
@@ -169,6 +224,7 @@
       document.getElementById('loading-msg').style.display = 'block';
       document.getElementById('lista-historico').innerHTML = '';
       fretesAgrupados = {};
+      listaFretesProcessados = [];
 
       try {
         const response = await fetch(APPS_SCRIPT_URL, {
@@ -180,6 +236,10 @@
 
         if (resultado.status === "Sucesso") {
           agruparFretes(resultado.registros);
+          
+          // Prepara a lista e inverte para o mais recente ficar no topo
+          listaFretesProcessados = Object.values(fretesAgrupados).reverse();
+          listaFretesVisiveis = [...listaFretesProcessados]; // Começa mostrando todos
           renderizarTabela();
         } else { alert("Erro: " + resultado.mensagem); }
       } catch (error) { alert("Erro ao conectar com a planilha.");
@@ -204,20 +264,53 @@
       });
     }
 
+    // --- NOVA FUNÇÃO DE FILTRAGEM ---
+    function aplicarFiltro() {
+      const dataInicio = document.getElementById('data-inicio').value;
+      const dataFim = document.getElementById('data-fim').value;
+
+      listaFretesVisiveis = listaFretesProcessados.filter(frete => {
+        let mostrar = true;
+        if (dataInicio && frete.data < dataInicio) mostrar = false;
+        if (dataFim && frete.data > dataFim) mostrar = false;
+        return mostrar;
+      });
+
+      renderizarTabela();
+    }
+
+    function limparFiltro() {
+      document.getElementById('data-inicio').value = '';
+      document.getElementById('data-fim').value = '';
+      listaFretesVisiveis = [...listaFretesProcessados];
+      renderizarTabela();
+    }
+    // --------------------------------
+
     function renderizarTabela() {
       const tbody = document.getElementById('lista-historico');
-      const lista = Object.values(fretesAgrupados).reverse();
+      tbody.innerHTML = '';
+      let somaTela = 0;
 
-      if (lista.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhum frete encontrado.</td></tr>'; return; }
+      if (listaFretesVisiveis.length === 0) { 
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhum frete encontrado no período.</td></tr>'; 
+        document.getElementById('visor-total-tela').innerText = "0.00";
+        return; 
+      }
 
-      lista.forEach(frete => {
+      listaFretesVisiveis.forEach(frete => {
         const dataBr = frete.data.split('-').reverse().join('/');
+        somaTela += frete.valorTotalGeral;
         tbody.innerHTML += `<tr><td>${dataBr}</td><td>${frete.cliente}</td><td>${frete.vendedor}</td><td>R$ ${frete.valorTotalGeral.toFixed(2)}</td><td><button class="btn-acao" onclick="abrirModal('${frete.chave}')">Abrir</button></td></tr>`;
       });
+      
+      // Atualiza o visor de soma de tudo que está filtrado
+      document.getElementById('visor-total-tela').innerText = somaTela.toFixed(2);
     }
 
     function abrirModal(chave) {
-      freteAberto = fretesAgrupados[chave];
+      // Procura o frete no array original pela chave
+      freteAberto = listaFretesProcessados.find(f => f.chave === chave);
       const dataBr = freteAberto.data.split('-').reverse().join('/');
       
       document.getElementById('det-data').innerText = dataBr;
@@ -256,10 +349,56 @@
       finally { btn.innerText = "🗑️ Excluir Lançamento do Sistema"; btn.disabled = false; }
     }
 
+    // --- NOVA FUNÇÃO: IMPRIMIR RELATÓRIO DO PERÍODO ---
+    function imprimirRelatorio() {
+      if(listaFretesVisiveis.length === 0) {
+        alert("Não há dados para imprimir neste período.");
+        return;
+      }
+
+      // 1. Gera o subtítulo do período
+      const dInicio = document.getElementById('data-inicio').value;
+      const dFim = document.getElementById('data-fim').value;
+      let textoPeriodo = "Todo o Histórico";
+      if(dInicio && dFim) textoPeriodo = `${dInicio.split('-').reverse().join('/')} até ${dFim.split('-').reverse().join('/')}`;
+      else if(dInicio) textoPeriodo = `A partir de ${dInicio.split('-').reverse().join('/')}`;
+      else if(dFim) textoPeriodo = `Até ${dFim.split('-').reverse().join('/')}`;
+      
+      document.getElementById('rel-periodo').innerText = textoPeriodo;
+
+      // 2. Preenche a tabela com os fretes visíveis
+      const tbodyRelatorio = document.getElementById('rel-tabela-body');
+      tbodyRelatorio.innerHTML = "";
+      let somaTotalRelatorio = 0;
+
+      listaFretesVisiveis.forEach(frete => {
+        const dataBr = frete.data.split('-').reverse().join('/');
+        somaTotalRelatorio += frete.valorTotalGeral;
+        tbodyRelatorio.innerHTML += `<tr>
+          <td>${dataBr}</td>
+          <td>${frete.cliente}</td>
+          <td>${frete.vendedor}</td>
+          <td><strong>R$ ${frete.valorTotalGeral.toFixed(2)}</strong></td>
+        </tr>`;
+      });
+
+      // 3. Coloca o total
+      document.getElementById('rel-total-geral').innerText = somaTotalRelatorio.toFixed(2);
+
+      // 4. Aciona a impressão A4 com a margem correta
+      const pageStyle = document.getElementById('print-page-style');
+      pageStyle.innerHTML = '@page { margin: 15mm; }';
+      
+      document.body.className = ''; 
+      document.body.classList.add('print-relatorio');
+      
+      window.print();
+    }
+
+    // IMPRESSÃO DOS FRETE INDIVIDUAIS (MANTIDA)
     function imprimir(tipo) {
       const dataBr = freteAberto.data.split('-').reverse().join('/');
       
-      // INJETA A MARGEM CORRETA DEPENDENDO DA IMPRESSORA
       const pageStyle = document.getElementById('print-page-style');
       if (tipo === 'termica') {
         pageStyle.innerHTML = '@page { margin: 0; }';
@@ -267,7 +406,7 @@
         pageStyle.innerHTML = '@page { margin: 15mm; }';
       }
 
-      document.body.classList.remove('print-termica', 'print-a4');
+      document.body.classList.remove('print-termica', 'print-a4', 'print-relatorio');
       document.body.classList.add('print-' + tipo);
 
       if (tipo === 'termica') {
