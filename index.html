@@ -116,7 +116,8 @@
 
     <div style="border-left: 4px solid #f5a623; padding-left: 15px;">
       <label style="margin-top:0;">Mercadoria:</label>
-      <select id="mercadoria" class="nav-enter" onchange="atualizarCodigo()" disabled><option value="">Aguarde...</option></select>
+      <input list="lista-mercadorias" id="mercadoria" class="nav-enter" oninput="atualizarCodigo()" placeholder="Aguarde..." disabled autocomplete="off">
+      <datalist id="lista-mercadorias"></datalist>
       
       <label>Código da Mercadoria:</label>
       <input type="text" id="codigo" readonly placeholder="Automático">
@@ -240,14 +241,18 @@
 
     function preencherSelects(dados) {
       const selectCliente = document.getElementById('cliente');
-      const selectMercadoria = document.getElementById('mercadoria');
+      const inputMercadoria = document.getElementById('mercadoria');
+      const datalistMercadoria = document.getElementById('lista-mercadorias');
       const selectVendedor = document.getElementById('vendedor');
       
       selectCliente.innerHTML = '<option value="">Selecione o Cliente</option>';
       dados.clientes.forEach(c => selectCliente.innerHTML += `<option value="${c}">${c}</option>`);
       
-      selectMercadoria.innerHTML = '<option value="">Selecione a Mercadoria</option>';
-      dados.mercadorias.forEach(m => selectMercadoria.innerHTML += `<option value="${m.nome}" data-cod="${m.codigo}">${m.nome}</option>`);
+      datalistMercadoria.innerHTML = '';
+      dados.mercadorias.forEach(m => {
+        datalistMercadoria.innerHTML += `<option value="${m.nome}" data-cod="${m.codigo}"></option>`;
+      });
+      inputMercadoria.placeholder = "Pesquise ou selecione a mercadoria...";
       
       if(dados.vendedores) {
         selectVendedor.innerHTML = '<option value="">Selecione o Vendedor</option>';
@@ -257,8 +262,18 @@
     }
 
     function atualizarCodigo() {
-      const select = document.getElementById('mercadoria');
-      document.getElementById('codigo').value = select.options[select.selectedIndex].getAttribute('data-cod') || '';
+      const input = document.getElementById('mercadoria');
+      const options = document.getElementById('lista-mercadorias').options;
+      let codigoEncontrado = '';
+
+      for (let i = 0; i < options.length; i++) {
+        if (options[i].value === input.value) {
+          codigoEncontrado = options[i].getAttribute('data-cod');
+          break;
+        }
+      }
+      
+      document.getElementById('codigo').value = codigoEncontrado;
     }
 
     function calcularSubtotal() {
